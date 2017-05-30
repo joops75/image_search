@@ -14,13 +14,14 @@ mongoose.connect(process.env.MONGOLAB_URI)//MONGOLAB_URI set via command line
 
 app.get('/', function(req, res) {
     res.set({'content-type': 'application/json; charset=utf-8'})
-    res.end("To search for images, type '/search/' at the end of the root address in the address bar followed by a search string. This string may optionally be followed by '?offset={number}' to paginate through the results by the specified number. \n\nTo get the 10 most recent searches, type '/history' at the end of the root address in the address bar.")
+    res.end("To search for images, type '/search/' at the end of the root address in the address bar followed by a search string. This string may optionally be followed by '?offset={number}' to display the specified result page number. \n\nTo get the 10 most recent searches, type '/history' at the end of the root address in the address bar.")
 })
 
 app.get('/search/:searchTerm(*)', function(req, res) {
     var searchTerm = req.params.searchTerm
     var offset
-    req.query.offset ? offset = req.query.offset : offset = 0
+    req.query.offset ? offset = (req.query.offset - 1) * resultQuant : offset = 0
+    if (offset < 0) offset = 0
     var newSearchString = searchString({'search string': searchTerm, 'date': new Date()})
     newSearchString.save(function(err) {
         if (err) throw err
